@@ -1,0 +1,95 @@
+type Student {
+  id: String!
+  name: String!
+  email: String!
+}
+
+type Course {
+  id: String!
+  title: String!
+  total_videos: Int!
+  total_quizzes: Int!
+}
+
+type TrackingAction {
+  id: String!
+  student_id: String!
+  course_id: String!
+  action_type: String!
+  resource_id: String!
+  time_spent_seconds: Int!
+  quiz_score: Float!
+  created_at: String!
+}
+
+type Progress {
+  student_id: String!
+  course_id: String!
+  watched_videos: Int!
+  passed_quizzes: Int!
+  total_videos: Int!
+  total_quizzes: Int!
+  time_spent_seconds: Int!
+  percentage: Float!
+  completed: Boolean!
+}
+
+type Certificate {
+  id: String!
+  student_id: String!
+  course_id: String!
+  student_name: String!
+  course_title: String!
+  pdf_path: String!
+  email: String!
+  issued_at: String!
+}
+
+type Dashboard {
+  student: Student
+  course: Course
+  progress: Progress
+  certificate: Certificate
+}
+
+type RecordActionResult {
+  action: TrackingAction!
+  progress: Progress!
+}
+
+type CertificateResult {
+  certificate: Certificate
+  message: String!
+}
+
+type Query {
+  student(id: String!): Student
+  course(id: String!): Course
+  progress(student_id: String!, course_id: String!): Progress
+  actions(student_id: String!, course_id: String!): [TrackingAction!]!
+  certificate(student_id: String!, course_id: String!): Certificate
+  certificates: [Certificate!]!
+  dashboard(student_id: String!, course_id: String!): Dashboard
+}
+
+type Mutation {
+  recordAction(
+    student_id: String!
+    course_id: String!
+    action_type: String!
+    resource_id: String
+    time_spent_seconds: Int
+    quiz_score: Float
+    course_total_videos: Int
+    course_total_quizzes: Int
+  ): RecordActionResult
+
+  issueCertificate(
+    student_id: String!
+    course_id: String!
+    student_name: String!
+    student_email: String!
+    course_title: String!
+    progress_percentage: Float!
+  ): CertificateResult
+}

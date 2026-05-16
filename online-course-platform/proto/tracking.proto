@@ -1,0 +1,155 @@
+syntax = "proto3";
+package onlinecourse;
+
+message Empty {}
+
+message Student {
+  string id = 1;
+  string name = 2;
+  string email = 3;
+}
+
+message Course {
+  string id = 1;
+  string title = 2;
+  int32 total_videos = 3;
+  int32 total_quizzes = 4;
+}
+
+message TrackingAction {
+  string id = 1;
+  string student_id = 2;
+  string course_id = 3;
+  string action_type = 4;
+  string resource_id = 5;
+  int32 time_spent_seconds = 6;
+  double quiz_score = 7;
+  string created_at = 8;
+}
+
+message Progress {
+  string student_id = 1;
+  string course_id = 2;
+  int32 watched_videos = 3;
+  int32 passed_quizzes = 4;
+  int32 total_videos = 5;
+  int32 total_quizzes = 6;
+  int32 time_spent_seconds = 7;
+  double percentage = 8;
+  bool completed = 9;
+}
+
+message TrackingEvent {
+  string event_id = 1;
+  string event_type = 2;
+  string student_id = 3;
+  string course_id = 4;
+  double progress_percentage = 5;
+  bool completed = 6;
+  string created_at = 7;
+}
+
+message RecordActionRequest {
+  string student_id = 1;
+  string course_id = 2;
+  string action_type = 3;
+  string resource_id = 4;
+  int32 time_spent_seconds = 5;
+  double quiz_score = 6;
+  int32 course_total_videos = 7;
+  int32 course_total_quizzes = 8;
+}
+
+message RecordActionResponse {
+  TrackingAction action = 1;
+  Progress progress = 2;
+}
+
+message GetProgressRequest {
+  string student_id = 1;
+  string course_id = 2;
+}
+
+message GetProgressResponse {
+  Progress progress = 1;
+}
+
+message GetActionsRequest {
+  string student_id = 1;
+  string course_id = 2;
+}
+
+message GetActionsResponse {
+  repeated TrackingAction actions = 1;
+}
+
+message Certificate {
+  string id = 1;
+  string student_id = 2;
+  string course_id = 3;
+  string student_name = 4;
+  string course_title = 5;
+  string pdf_path = 6;
+  string email = 7;
+  string issued_at = 8;
+}
+
+message IssueCertificateRequest {
+  string student_id = 1;
+  string course_id = 2;
+  string student_name = 3;
+  string student_email = 4;
+  string course_title = 5;
+  double progress_percentage = 6;
+}
+
+message IssueCertificateResponse {
+  Certificate certificate = 1;
+  string message = 2;
+}
+
+message GetCertificateRequest {
+  string student_id = 1;
+  string course_id = 2;
+}
+
+message GetCertificateResponse {
+  Certificate certificate = 1;
+}
+
+message ListCertificatesResponse {
+  repeated Certificate certificates = 1;
+}
+
+message GetStudentRequest {
+  string student_id = 1;
+}
+
+message GetStudentResponse {
+  Student student = 1;
+}
+
+message GetCourseRequest {
+  string course_id = 1;
+}
+
+message GetCourseResponse {
+  Course course = 1;
+}
+
+service TrackingService {
+  rpc RecordAction(RecordActionRequest) returns (RecordActionResponse);
+  rpc GetProgress(GetProgressRequest) returns (GetProgressResponse);
+  rpc GetActions(GetActionsRequest) returns (GetActionsResponse);
+}
+
+service CertificationService {
+  rpc IssueCertificate(IssueCertificateRequest) returns (IssueCertificateResponse);
+  rpc GetCertificate(GetCertificateRequest) returns (GetCertificateResponse);
+  rpc ListCertificates(Empty) returns (ListCertificatesResponse);
+}
+
+service CourseService {
+  rpc GetStudent(GetStudentRequest) returns (GetStudentResponse);
+  rpc GetCourse(GetCourseRequest) returns (GetCourseResponse);
+}
