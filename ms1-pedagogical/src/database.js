@@ -1,8 +1,8 @@
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 
-// FORCER le chemin absolu vers data/pedagora.db
-const dbPath = path.join(__dirname, '..', 'data', 'pedagora.db');
+// FORCER le chemin absolu vers data/academix.db
+const dbPath = path.join(__dirname, '..', 'data', 'academix.db');
 
 console.log('Chemin BDD:', dbPath); // Pour débug
 

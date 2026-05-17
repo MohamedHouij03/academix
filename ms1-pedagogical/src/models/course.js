@@ -48,6 +48,39 @@ class CourseModel {
       );
     });
   }
+
+  static update(id, courseData) {
+    return new Promise((resolve, reject) => {
+      const { title, description, category, duration_hours, price } = courseData;
+      db.run(
+        `UPDATE courses 
+         SET title = COALESCE(?, title), 
+             description = COALESCE(?, description), 
+             category = COALESCE(?, category), 
+             duration_hours = COALESCE(?, duration_hours), 
+             price = COALESCE(?, price)
+         WHERE id = ?`,
+        [title, description, category, duration_hours, price, id],
+        function(err) {
+          if (err) reject(err);
+          else resolve({ changes: this.changes });
+        }
+      );
+    });
+  }
+
+  static delete(id) {
+    return new Promise((resolve, reject) => {
+      db.run(
+        `DELETE FROM courses WHERE id = ?`,
+        [id],
+        function(err) {
+          if (err) reject(err);
+          else resolve({ changes: this.changes });
+        }
+      );
+    });
+  }
 }
 
 module.exports = CourseModel;

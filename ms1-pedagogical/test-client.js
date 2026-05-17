@@ -12,7 +12,7 @@ const packageDefinition = protoLoader.loadSync(PROTO_PATH, {
   oneofs: true
 });
 
-const courseProto = grpc.loadPackageDefinition(packageDefinition).pedagora;
+const courseProto = grpc.loadPackageDefinition(packageDefinition).academix;
 
 const client = new courseProto.CourseService(
   'localhost:50051',

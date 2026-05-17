@@ -1,6 +1,7 @@
 const CourseModel = require('../models/course');
 const UserModel = require('../models/user');
 const EnrollmentModel = require('../models/enrollment');
+const { emitEnrollmentCreated } = require('./kafkaService');
 
 class CourseService {
 
@@ -45,8 +46,8 @@ class CourseService {
           progress: 0.0
         });
 
-        // ICI : Plus tard, on enverra un event Kafka pour prévenir MS2 et MS3
-        // Pour l'instant, on retourne juste le succès
+        // 5. Envoyer un event Kafka pour prévenir MS2 et MS3
+        await emitEnrollmentCreated(enrollment);
         
         resolve({
           success: true,

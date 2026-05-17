@@ -1,0 +1,5 @@
+E No address added out of total 1 resolved
+Echec de la liaison du serveur Tracking: Error: No address added out of total 1 resolved errors: [listen EADDRINUSE: address already in use 0.0.0.0:50052]
+    at Server.bindAddressList (C:\Users\moham\Documents\academix\node_modules\@grpc\grpc-js\build\src\server.js:490:27)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async Server.bindPort (C:\Users\moham\Documents\academix\node_modules\@grpc\grpc-js\build\src\server.js:523:36)

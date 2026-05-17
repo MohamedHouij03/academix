@@ -12,7 +12,7 @@ const packageDefinition = protoLoader.loadSync(PROTO_PATH, {
   oneofs: true
 });
 
-const courseProto = grpc.loadPackageDefinition(packageDefinition).pedagora;
+const courseProto = grpc.loadPackageDefinition(packageDefinition).academix;
 
 // Importer vos services/logique
 const CourseModel = require('./models/course');
@@ -24,15 +24,87 @@ const CourseService = require('./services/courseService');
 function getCourse(call, callback) {
   const { id } = call.request;
   
+  if (!id) {
+    return callback({
+      code: grpc.status.INVALID_ARGUMENT,
+      details: 'ID manquant'
+    });
+  }
+
   CourseModel.getById(id)
     .then(course => {
       if (!course) {
-        callback(null, { course: {}, found: false });
+        callback({
+          code: grpc.status.NOT_FOUND,
+          details: 'Cours non trouvé'
+        });
       } else {
         callback(null, { course, found: true });
       }
     })
-    .catch(err => callback(err));
+    .catch(err => callback({
+      code: grpc.status.INTERNAL,
+      details: err.message
+    }));
+}
+
+function updateCourse(call, callback) {
+  const data = call.request;
+  if (!data.id) {
+    return callback({
+      code: grpc.status.INVALID_ARGUMENT,
+      details: 'ID du cours manquant'
+    });
+  }
+  
+  CourseModel.update(data.id, data)
+    .then(result => {
+      if (result.changes === 0) {
+        return callback({
+          code: grpc.status.NOT_FOUND,
+          details: 'Cours non trouvé'
+        });
+      }
+      return CourseModel.getById(data.id);
+    })
+    .then(course => {
+      if (course) {
+        callback(null, { course, success: true, message: 'Cours mis à jour' });
+      }
+    })
+    .catch(err => {
+      callback({
+        code: grpc.status.INTERNAL,
+        details: err.message
+      });
+    });
+}
+
+function deleteCourse(call, callback) {
+  const { id } = call.request;
+  if (!id) {
+    return callback({
+      code: grpc.status.INVALID_ARGUMENT,
+      details: 'ID du cours manquant'
+    });
+  }
+  
+  CourseModel.delete(id)
+    .then(result => {
+      if (result.changes === 0) {
+        return callback({
+          code: grpc.status.NOT_FOUND,
+          details: 'Cours non trouvé'
+        });
+      }
+      callback(null, { success: true, message: 'Cours supprimé' });
+    })
+    .catch(err => {
+      callback({
+        code: grpc.status.INTERNAL,
+        details: err.message
+      });
+    });
 }
 
 function listCourses(call, callback) {
@@ -107,7 +179,9 @@ function main() {
     ListCourses: listCourses,
     CreateUser: createUser,
     CreateEnrollment: createEnrollment,
-    GetUserEnrollments: getUserEnrollments
+    GetUserEnrollments: getUserEnrollments,
+    UpdateCourse: updateCourse,
+    DeleteCourse: deleteCourse
   });
   
   const address = '0.0.0.0:50051';
