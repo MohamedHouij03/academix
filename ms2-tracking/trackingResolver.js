@@ -100,41 +100,9 @@ async function getActionById(id) {
   return toJson(doc);
 }
 
-async function updateAction(id, payload) {
-  const { actions, persistActions } = await dbPromise;
-  const doc = await actions.findOne(id).exec();
-  if (!doc) throw new Error('Action not found');
-
-  await doc.atomicPatch({
-    student_id: payload.student_id,
-    course_id: payload.course_id,
-    action_type: payload.action_type,
-    resource_id: payload.resource_id || '',
-    time_spent_seconds: payload.time_spent_seconds || 0,
-    quiz_score: payload.quiz_score || 0,
-    course_total_videos: payload.course_total_videos || 0,
-    course_total_quizzes: payload.course_total_quizzes || 0
-  });
-
-  await persistActions();
-  return doc.toJSON();
-}
-
-async function deleteAction(id) {
-  const { actions, persistActions } = await dbPromise;
-  const doc = await actions.findOne(id).exec();
-  if (!doc) throw new Error('Action not found');
-
-  await doc.remove();
-  await persistActions();
-  return { success: true, message: 'Action deleted' };
-}
-
 module.exports = {
   recordAction,
   calculateProgress,
   getActionsByStudentAndCourse,
-  getActionById,
-  updateAction,
-  deleteAction
+  getActionById
 };

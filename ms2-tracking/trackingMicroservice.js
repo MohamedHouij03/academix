@@ -55,33 +55,6 @@ const trackingService = {
         details: error.message
       });
     }
-  },
-
-  UpdateAction: async (call, callback) => {
-    try {
-      const action = await trackingResolver.updateAction(
-        call.request.id,
-        call.request
-      );
-      callback(null, { action });
-    } catch (error) {
-      callback({
-        code: grpc.status.INVALID_ARGUMENT,
-        details: error.message
-      });
-    }
-  },
-
-  DeleteAction: async (call, callback) => {
-    try {
-      const result = await trackingResolver.deleteAction(call.request.id);
-      callback(null, result);
-    } catch (error) {
-      callback({
-        code: grpc.status.INVALID_ARGUMENT,
-        details: error.message
-      });
-    }
   }
 };
 
