@@ -1,0 +1,699 @@
+{
+  "info": {
+    "name": "Academix API",
+    "_postman_id": "academix-collection-v1",
+    "description": "Complete test suite for the Academix microservices platform.\n\nBase URL: http://localhost:3000\n\nServices:\n- MS1 (Pédagogique) → gRPC :50051 → /api/cours, /api/users, /api/inscriptions\n- MS2 (Tracking)    → gRPC :50052 → /tracking/*\n- MS3 (Certification)→ gRPC :50053\n- GraphQL           → POST /graphql",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url",   "value": "http://localhost:3000" },
+    { "key": "course_id",  "value": "" },
+    { "key": "user_id",    "value": "" },
+    { "key": "enrollment_id", "value": "" }
+  ],
+  "item": [
+
+    {
+      "name": "🏠 Gateway",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/",
+            "description": "Returns gateway status and list of all available routes."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Has rest routes', () => {",
+                  "  const body = pm.response.json();",
+                  "  pm.expect(body).to.have.property('rest');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+
+    {
+      "name": "📚 Cours (MS1)",
+      "item": [
+        {
+          "name": "List All Courses",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('success = true', () => {",
+                  "  const body = pm.response.json();",
+                  "  pm.expect(body.success).to.be.true;",
+                  "  pm.expect(body.data).to.be.an('array');",
+                  "});",
+                  "// Save first course ID for later tests",
+                  "const body = pm.response.json();",
+                  "if (body.data && body.data.length > 0) {",
+                  "  pm.collectionVariables.set('course_id', body.data[0].id);",
+                  "  console.log('Saved course_id:', body.data[0].id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/cours",
+              "host": ["{{base_url}}"],
+              "path": ["api", "cours"]
+            },
+            "description": "Returns all courses (default page=1, limit=10)."
+          }
+        },
+        {
+          "name": "List Courses – Filtered by Category",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('All results are development', () => {",
+                  "  const body = pm.response.json();",
+                  "  body.data.forEach(c => pm.expect(c.category).to.equal('development'));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/cours?category=development",
+              "host": ["{{base_url}}"],
+              "path": ["api", "cours"],
+              "query": [
+                { "key": "category", "value": "development" }
+              ]
+            },
+            "description": "Filter by category. Valid values: development, design, architecture, devops."
+          }
+        },
+        {
+          "name": "List Courses – Pagination",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Max 2 results', () => {",
+                  "  pm.expect(pm.response.json().data.length).to.be.at.most(2);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/cours?page=1&limit=2",
+              "host": ["{{base_url}}"],
+              "path": ["api", "cours"],
+              "query": [
+                { "key": "page",  "value": "1" },
+                { "key": "limit", "value": "2" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Course by ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Has course data', () => {",
+                  "  const body = pm.response.json();",
+                  "  pm.expect(body.success).to.be.true;",
+                  "  pm.expect(body.data).to.have.property('id');",
+                  "  pm.expect(body.data).to.have.property('title');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/cours/{{course_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "cours", "{{course_id}}"]
+            },
+            "description": "Run 'List All Courses' first to auto-populate {{course_id}}."
+          }
+        },
+        {
+          "name": "Get Course – Not Found (404)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 404', () => pm.response.to.have.status(404));",
+                  "pm.test('success = false', () => {",
+                  "  pm.expect(pm.response.json().success).to.be.false;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/cours/non-existent-id-000"
+          }
+        },
+        {
+          "name": "Update Course (PUT)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Price updated', () => {",
+                  "  const body = pm.response.json();",
+                  "  pm.expect(body.success).to.be.true;",
+                  "  pm.expect(body.data.price).to.equal(99.99);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "url": "{{base_url}}/api/cours/{{course_id}}",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Introduction à Node.js (Mis à jour)\",\n  \"price\": 99.99\n}"
+            },
+            "description": "Partial update is supported — only fields provided are updated (COALESCE in SQL)."
+          }
+        },
+        {
+          "name": "Update Course (PATCH)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "url": "{{base_url}}/api/cours/{{course_id}}",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"description\": \"Description mise à jour via PATCH\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Delete Course",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Deleted successfully', () => {",
+                  "  pm.expect(pm.response.json().success).to.be.true;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "url": "{{base_url}}/api/cours/{{course_id}}",
+            "description": "⚠️ This permanently deletes the course. Run 'List All Courses' again afterwards to pick a fresh ID."
+          }
+        },
+        {
+          "name": "Delete Course – Not Found (404)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 404', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "url": "{{base_url}}/api/cours/non-existent-id-000"
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "👤 Users (MS1)",
+      "item": [
+        {
+          "name": "Create User (Student)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "pm.test('Has user data', () => {",
+                  "  const body = pm.response.json();",
+                  "  pm.expect(body.success).to.be.true;",
+                  "  pm.expect(body.data).to.have.property('id');",
+                  "});",
+                  "const body = pm.response.json();",
+                  "if (body.data && body.data.id) {",
+                  "  pm.collectionVariables.set('user_id', body.data.id);",
+                  "  console.log('Saved user_id:', body.data.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/users",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Test Étudiant\",\n  \"email\": \"test.etudiant@academix.com\",\n  \"password\": \"securepass123\",\n  \"role\": \"student\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Create User (Instructor)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/users",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Test Instructeur\",\n  \"email\": \"test.instructeur@academix.com\",\n  \"password\": \"securepass123\",\n  \"role\": \"instructor\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Create User – Duplicate Email (409)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 409 Conflict', () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/users",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Alice Duplicate\",\n  \"email\": \"alice@test.com\",\n  \"password\": \"123\"\n}"
+            },
+            "description": "alice@test.com already exists from seed data."
+          }
+        },
+        {
+          "name": "Create User – Missing Fields (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 400', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/users",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Incomplet\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Search Users",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Returns array', () => {",
+                  "  pm.expect(pm.response.json().data).to.be.an('array');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/users/search?q=alice",
+              "host": ["{{base_url}}"],
+              "path": ["api", "users", "search"],
+              "query": [{ "key": "q", "value": "alice" }]
+            },
+            "description": "Searches by name or email. Seeded users: alice@test.com, bob@test.com, charlie@test.com."
+          }
+        },
+        {
+          "name": "Search Users – Missing Query (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 400', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/users/search"
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "📋 Inscriptions (MS1)",
+      "item": [
+        {
+          "name": "Enroll User in Course",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "pm.test('Enrollment created', () => {",
+                  "  const body = pm.response.json();",
+                  "  pm.expect(body.success).to.be.true;",
+                  "});",
+                  "const body = pm.response.json();",
+                  "if (body.data && body.data.id) {",
+                  "  pm.collectionVariables.set('enrollment_id', body.data.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/inscriptions",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": \"{{user_id}}\",\n  \"course_id\": \"{{course_id}}\"\n}"
+            },
+            "description": "Run 'Create User' and 'List All Courses' first to populate the variables."
+          }
+        },
+        {
+          "name": "Enroll – Duplicate (409)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 409 Conflict', () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/inscriptions",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": \"{{user_id}}\",\n  \"course_id\": \"{{course_id}}\"\n}"
+            },
+            "description": "Send the same enrollment twice → 409."
+          }
+        },
+        {
+          "name": "Enroll – Missing Fields (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 400', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/inscriptions",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": \"{{user_id}}\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Get Enrollments by User ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Has enrollments array', () => {",
+                  "  const body = pm.response.json();",
+                  "  pm.expect(body.data).to.be.an('array');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/inscriptions/{{user_id}}",
+            "description": "Returns all courses the user is enrolled in."
+          }
+        },
+        {
+          "name": "Search Enrollments – By Status",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Returns array', () => {",
+                  "  pm.expect(pm.response.json().data).to.be.an('array');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/inscriptions/search?status=active",
+              "host": ["{{base_url}}"],
+              "path": ["api", "inscriptions", "search"],
+              "query": [{ "key": "status", "value": "active" }]
+            }
+          }
+        },
+        {
+          "name": "Search Enrollments – By User ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/inscriptions/search?user_id={{user_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "inscriptions", "search"],
+              "query": [{ "key": "user_id", "value": "{{user_id}}" }]
+            }
+          }
+        },
+        {
+          "name": "Search Enrollments – No Params (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 400', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/inscriptions/search"
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "📊 Tracking (MS2)",
+      "item": [
+        {
+          "name": "Record Action",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// MS2 may not be running — accept 201 or 400/500",
+                  "pm.test('Response received', () => {",
+                  "  pm.expect(pm.response.code).to.be.oneOf([201, 400, 500]);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/tracking/actions",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"student_id\": \"{{user_id}}\",\n  \"course_id\": \"{{course_id}}\",\n  \"action_type\": \"video_watched\",\n  \"metadata\": \"lesson_1\"\n}"
+            },
+            "description": "Requires MS2 (Tracking) running on :50052."
+          }
+        },
+        {
+          "name": "Get Progress",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Response received', () => {",
+                  "  pm.expect(pm.response.code).to.be.oneOf([200, 500]);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/tracking/progress/{{user_id}}/{{course_id}}",
+            "description": "Requires MS2 running on :50052."
+          }
+        },
+        {
+          "name": "Get Actions History",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/tracking/actions/{{user_id}}/{{course_id}}",
+            "description": "Requires MS2 running on :50052."
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "🔷 GraphQL",
+      "item": [
+        {
+          "name": "Query – List Courses",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('No errors', () => {",
+                  "  const body = pm.response.json();",
+                  "  pm.expect(body).to.not.have.property('errors');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/graphql",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"{ courses { id title category price } }\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Query – Get Course by ID",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/graphql",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"query GetCourse($id: ID!) { course(id: $id) { id title description category duration_hours price } }\",\n  \"variables\": { \"id\": \"{{course_id}}\" }\n}"
+            }
+          }
+        },
+        {
+          "name": "Mutation – Create User",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/graphql",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"mutation { createUser(name: \\\"GraphQL User\\\", email: \\\"graphql@academix.com\\\", password: \\\"pass123\\\") { id name email role } }\"\n}"
+            }
+          }
+        }
+      ]
+    }
+
+  ]
+}

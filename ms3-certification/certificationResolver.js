@@ -66,41 +66,8 @@ async function issueCertificate(payload) {
   };
 }
 
-async function updateCertificate(student_id, course_id, payload) {
-  const existing = await getCertificate(student_id, course_id);
-  if (!existing) throw new Error('Certificate not found');
-
-  await db.run(
-    `UPDATE certificates SET student_name = ?, course_title = ?, email = ? WHERE student_id = ? AND course_id = ?`,
-    [
-      payload.student_name || existing.student_name,
-      payload.course_title || existing.course_title,
-      payload.student_email || existing.email,
-      student_id,
-      course_id
-    ]
-  );
-
-  const updated = await getCertificate(student_id, course_id);
-  return { certificate: updated, message: 'Certificat mis a jour' };
-}
-
-async function deleteCertificate(student_id, course_id) {
-  const existing = await getCertificate(student_id, course_id);
-  if (!existing) throw new Error('Certificate not found');
-
-  await db.run(
-    `DELETE FROM certificates WHERE student_id = ? AND course_id = ?`,
-    [student_id, course_id]
-  );
-
-  return { success: true, message: 'Certificat supprime' };
-}
-
 module.exports = {
   issueCertificate,
   getCertificate,
-  listCertificates,
-  updateCertificate,
-  deleteCertificate
+  listCertificates
 };
