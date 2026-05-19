@@ -97,8 +97,24 @@ const resolvers = {
       return callGrpc(createTrackingClient(), 'RecordAction', args);
     },
 
+    updateAction: async (_, args) => {
+      return callGrpc(createTrackingClient(), 'UpdateAction', args);
+    },
+
+    deleteAction: async (_, { id }) => {
+      return callGrpc(createTrackingClient(), 'DeleteAction', { id });
+    },
+
     issueCertificate: async (_, args) => {
       return callGrpc(createCertificationClient(), 'IssueCertificate', args);
+    },
+
+    updateCertificate: async (_, args) => {
+      return callGrpc(createCertificationClient(), 'UpdateCertificate', args);
+    },
+
+    deleteCertificate: async (_, { student_id, course_id }) => {
+      return callGrpc(createCertificationClient(), 'DeleteCertificate', { student_id, course_id });
     }
   }
 };

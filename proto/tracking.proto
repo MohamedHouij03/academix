@@ -137,16 +137,68 @@ message GetCourseResponse {
   Course course = 1;
 }
 
+message UpdateActionRequest {
+  string id = 1;
+  string student_id = 2;
+  string course_id = 3;
+  string action_type = 4;
+  string resource_id = 5;
+  int32 time_spent_seconds = 6;
+  double quiz_score = 7;
+  int32 course_total_videos = 8;
+  int32 course_total_quizzes = 9;
+}
+
+message UpdateActionResponse {
+  TrackingAction action = 1;
+}
+
+message DeleteActionRequest {
+  string id = 1;
+}
+
+message DeleteActionResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message UpdateCertificateRequest {
+  string student_id = 1;
+  string course_id = 2;
+  string student_name = 3;
+  string student_email = 4;
+  string course_title = 5;
+}
+
+message UpdateCertificateResponse {
+  Certificate certificate = 1;
+  string message = 2;
+}
+
+message DeleteCertificateRequest {
+  string student_id = 1;
+  string course_id = 2;
+}
+
+message DeleteCertificateResponse {
+  bool success = 1;
+  string message = 2;
+}
+
 service TrackingService {
   rpc RecordAction(RecordActionRequest) returns (RecordActionResponse);
   rpc GetProgress(GetProgressRequest) returns (GetProgressResponse);
   rpc GetActions(GetActionsRequest) returns (GetActionsResponse);
+  rpc UpdateAction(UpdateActionRequest) returns (UpdateActionResponse);
+  rpc DeleteAction(DeleteActionRequest) returns (DeleteActionResponse);
 }
 
 service CertificationService {
   rpc IssueCertificate(IssueCertificateRequest) returns (IssueCertificateResponse);
   rpc GetCertificate(GetCertificateRequest) returns (GetCertificateResponse);
   rpc ListCertificates(Empty) returns (ListCertificatesResponse);
+  rpc UpdateCertificate(UpdateCertificateRequest) returns (UpdateCertificateResponse);
+  rpc DeleteCertificate(DeleteCertificateRequest) returns (DeleteCertificateResponse);
 }
 
 service CourseService {
