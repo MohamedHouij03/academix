@@ -53,6 +53,37 @@ const certificationService = {
         details: error.message
       });
     }
+  },
+
+  UpdateCertificate: async (call, callback) => {
+    try {
+      const result = await certificationResolver.updateCertificate(
+        call.request.student_id,
+        call.request.course_id,
+        call.request
+      );
+      callback(null, result);
+    } catch (error) {
+      callback({
+        code: grpc.status.INVALID_ARGUMENT,
+        details: error.message
+      });
+    }
+  },
+
+  DeleteCertificate: async (call, callback) => {
+    try {
+      const result = await certificationResolver.deleteCertificate(
+        call.request.student_id,
+        call.request.course_id
+      );
+      callback(null, result);
+    } catch (error) {
+      callback({
+        code: grpc.status.INVALID_ARGUMENT,
+        details: error.message
+      });
+    }
   }
 };
 

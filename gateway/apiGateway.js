@@ -103,6 +103,72 @@ app.use('/api/cours', courseRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/inscriptions', enrollmentRoutes);
 
+app.post('/api/certificates', async (req, res) => {
+  try {
+    const response = await callGrpc(createCertificationClient(), 'IssueCertificate', req.body);
+    res.status(201).json(response);
+  } catch (error) {
+    res.status(400).json({ error: error.details || error.message });
+  }
+});
+
+app.get('/api/certificates/:student_id/:course_id', async (req, res) => {
+  try {
+    const response = await callGrpc(createCertificationClient(), 'GetCertificate', {
+      student_id: req.params.student_id,
+      course_id: req.params.course_id
+    });
+    res.json(response);
+  } catch (error) {
+    res.status(500).json({ error: error.details || error.message });
+  }
+});
+
+app.get('/api/certificates', async (req, res) => {
+  try {
+    const response = await callGrpc(createCertificationClient(), 'ListCertificates', {});
+    res.json(response);
+  } catch (error) {
+    res.status(500).json({ error: error.details || error.message });
+  }
+});
+
+app.put('/tracking/actions/:id', async (req, res) => {
+  try {
+    const response = await callGrpc(createTrackingClient(), 'UpdateAction', { id: req.params.id, ...req.body });
+    res.json(response);
+  } catch (error) {
+    res.status(400).json({ error: error.details || error.message });
+  }
+});
+
+app.delete('/tracking/actions/:id', async (req, res) => {
+  try {
+    const response = await callGrpc(createTrackingClient(), 'DeleteAction', { id: req.params.id });
+    res.json(response);
+  } catch (error) {
+    res.status(400).json({ error: error.details || error.message });
+  }
+});
+
+app.put('/api/certificates', async (req, res) => {
+  try {
+    const response = await callGrpc(createCertificationClient(), 'UpdateCertificate', req.body);
+    res.json(response);
+  } catch (error) {
+    res.status(400).json({ error: error.details || error.message });
+  }
+});
+
+app.delete('/api/certificates', async (req, res) => {
+  try {
+    const response = await callGrpc(createCertificationClient(), 'DeleteCertificate', req.body);
+    res.json(response);
+  } catch (error) {
+    res.status(400).json({ error: error.details || error.message });
+  }
+});
+
 const server = new ApolloServer({
   typeDefs,
   resolvers
