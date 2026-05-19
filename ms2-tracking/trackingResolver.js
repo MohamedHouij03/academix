@@ -105,16 +105,16 @@ async function updateAction(id, payload) {
   const doc = await actions.findOne(id).exec();
   if (!doc) throw new Error('Action not found');
 
-  await doc.incrementalPatch({
-    student_id: payload.student_id,
-    course_id: payload.course_id,
-    action_type: payload.action_type,
-    resource_id: payload.resource_id || '',
-    time_spent_seconds: payload.time_spent_seconds || 0,
-    quiz_score: payload.quiz_score || 0,
-    course_total_videos: payload.course_total_videos || 0,
-    course_total_quizzes: payload.course_total_quizzes || 0
-  });
+  await doc.atomicUpdate((oldData) => ({
+    student_id: payload.student_id || oldData.student_id,
+    course_id: payload.course_id || oldData.course_id,
+    action_type: payload.action_type || oldData.action_type,
+    resource_id: payload.resource_id !== undefined ? payload.resource_id : oldData.resource_id,
+    time_spent_seconds: payload.time_spent_seconds !== undefined ? payload.time_spent_seconds : oldData.time_spent_seconds,
+    quiz_score: payload.quiz_score !== undefined ? payload.quiz_score : oldData.quiz_score,
+    course_total_videos: payload.course_total_videos !== undefined ? payload.course_total_videos : oldData.course_total_videos,
+    course_total_quizzes: payload.course_total_quizzes !== undefined ? payload.course_total_quizzes : oldData.course_total_quizzes
+  }));
 
   await persistActions();
   return doc.toJSON();
