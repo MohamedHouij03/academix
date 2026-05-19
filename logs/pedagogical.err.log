@@ -7,3 +7,9 @@ Erreur démarrage gRPC: Error: No address added out of total 1 resolved errors: 
     at Server.bindAddressList (C:\Users\moham\Documents\academix\ms1-pedagogical\node_modules\@grpc\grpc-js\build\src\server.js:490:27)
     at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
     at async Server.bindPort (C:\Users\moham\Documents\academix\ms1-pedagogical\node_modules\@grpc\grpc-js\build\src\server.js:523:36)
+{"level":"WARN","timestamp":"2026-05-19T10:15:50.316Z","logger":"kafkajs","message":"KafkaJS v2.0.0 switched default partitioner. To retain the same partitioning behavior as in previous versions, create the producer with the option \"createPartitioner: Partitioners.LegacyPartitioner\". See the migration guide at https://kafka.js.org/docs/migration-guide-v2.0.0#producer-new-default-partitioner for details. Silence this warning by setting the environment variable \"KAFKAJS_NO_PARTITIONER_WARNING=1\""}
+(node:12480) DeprecationWarning: Calling start() is no longer necessary. It can be safely omitted.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+{"level":"WARN","timestamp":"2026-05-19T10:17:54.875Z","logger":"kafkajs","message":"KafkaJS v2.0.0 switched default partitioner. To retain the same partitioning behavior as in previous versions, create the producer with the option \"createPartitioner: Partitioners.LegacyPartitioner\". See the migration guide at https://kafka.js.org/docs/migration-guide-v2.0.0#producer-new-default-partitioner for details. Silence this warning by setting the environment variable \"KAFKAJS_NO_PARTITIONER_WARNING=1\""}
+(node:28620) DeprecationWarning: Calling start() is no longer necessary. It can be safely omitted.
+(Use `node --trace-deprecation ...` to show where the warning was created)

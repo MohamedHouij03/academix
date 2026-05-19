@@ -1,5 +1,29 @@
 [
   {
+    "id": "7de133d5-ca9f-4260-9390-a794ddbdeac7",
+    "student_id": "s1",
+    "course_id": "c1",
+    "action_type": "video_watched",
+    "resource_id": "v1",
+    "time_spent_seconds": 120,
+    "quiz_score": 0,
+    "course_total_videos": 5,
+    "course_total_quizzes": 3,
+    "created_at": "2026-05-19T10:16:48.536Z"
+  },
+  {
+    "id": "1ebb1556-bd2e-4ff5-bc19-a3fe836a9e1d",
+    "student_id": "s2",
+    "course_id": "c1",
+    "action_type": "course_completed",
+    "resource_id": "final",
+    "time_spent_seconds": 999,
+    "quiz_score": 100,
+    "course_total_videos": 1,
+    "course_total_quizzes": 1,
+    "created_at": "2026-05-19T10:16:59.849Z"
+  },
+  {
     "id": "945d91c3-621b-4385-b568-400889f48842",
     "student_id": "student-1",
     "course_id": "course-1",

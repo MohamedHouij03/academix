@@ -32,6 +32,13 @@ function createTrackingClient() {
   );
 }
 
+function createCertificationClient() {
+  return new onlineCourseProto.CertificationService(
+    process.env.CERTIFICATION_GRPC_URL || 'localhost:50053',
+    grpc.credentials.createInsecure()
+  );
+}
+
 function callGrpc(client, method, request) {
   return new Promise((resolve, reject) => {
     client[method](request, (err, response) => {
