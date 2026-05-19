@@ -1,8 +1,10 @@
 const { Kafka } = require('kafkajs');
 
+const brokers = (process.env.KAFKA_BROKERS || 'localhost:9092').split(',');
+
 const kafka = new Kafka({
   clientId: 'ms1-pedagogical',
-  brokers: [process.env.KAFKA_BROKER || 'localhost:9092']
+  brokers
 });
 
 const producer = kafka.producer();
